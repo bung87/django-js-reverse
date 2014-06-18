@@ -10,7 +10,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.core import urlresolvers
-from .settings import JS_VAR_NAME
+from .settings import JS_VAR_NAME,JS_REVERSE_FILTERS
 
 
 def urls_js(request):
@@ -19,8 +19,16 @@ def urls_js(request):
             'JS_REVERSE_JS_VAR_NAME setting "%s" is not a valid javascript identifier.' % (JS_VAR_NAME))
 
     url_patterns = list(urlresolvers.get_resolver(None).reverse_dict.items())
-    url_list = [(url_name, url_pattern[0][0]) for url_name, url_pattern in url_patterns if
-                (isinstance(url_name, str) or isinstance(url_name, text_type))]
+    url_list = []
+    for url_name, url_pattern in url_patterns:
+        if isinstance(url_name, str) or isinstance(url_name, text_type):
+             matched=False
+             for f in JS_REVERSE_FILTERS :
+                 if url_name.startswith(f):
+                     matched=True
+                     break
+             if  matched==False:
+                 url_list.append((url_name, url_pattern[0][0]))
 
     return render_to_response('django_js_reverse/urls_js.tpl',
                               {
