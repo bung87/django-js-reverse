@@ -37,6 +37,21 @@ this.{{ js_var_name }} = (function () {
         }
         return self;
     };
+    Urls.resolve=function(path){
+    var path= typeof path == 'undefined' ? document.location.pathname.slice(1):path;
+    var paramsParttern=new RegExp(/%\([a-zA-Z_-]+\)[s]/g);
+    for (var k in Urls._instance.url_patterns){
+       var parrtern= Urls._instance.url_patterns[k][0],args=Urls._instance.url_patterns[k][1];
+        if(paramsParttern.test(parrtern)){
+            var newPartternString=parrtern.replace(paramsParttern,'([a-zA-Z_-\\\d]+)'),
+                newParttern=new RegExp(newPartternString);
+            if(newParttern.test(path)) return k;
+        }else{
+
+            if(parrtern.indexOf(path)!==-1) {return k;}
+        }
+    }
+    };
 
     return Urls;
 })();
