@@ -13,12 +13,17 @@ this.{{ js_var_name }} = (function () {
             _ref = self.url_patterns[url_pattern], url = _ref[0], url_args = _ref[1];
             for (index = _i = 0, _len = url_args.length; _i < _len; index = ++_i) {
                 url_arg = url_args[index];
+                {% if use_backbone %}
+                url = url.replace(":" + url_arg, arguments[index] || '');
+                {% else %}
                 url = url.replace("%(" + url_arg + ")s", arguments[index] || '');
+                {% endif %}
+
             }
             return '{{url_prefix|escapejs}}' + url;
         };
     };
-
+    Urls.routes = {{url_routes|safe}};
     Urls.init = function () {
         var name, pattern, self, url_patterns, _i, _len, _ref;
         url_patterns = [
@@ -39,7 +44,12 @@ this.{{ js_var_name }} = (function () {
     };
     Urls.resolve=function(path){
     var path= typeof path == 'undefined' ? document.location.pathname.slice(1):path;
+    {% if use_backbone %}
+    var paramsParttern=new RegExp(/:[a-zA-Z_-]+/g);
+    {% else %}
     var paramsParttern=new RegExp(/%\([a-zA-Z_-]+\)[s]/g);
+    {% endif %}
+
     for (var k in Urls._instance.url_patterns){
        var parrtern= Urls._instance.url_patterns[k][0],args=Urls._instance.url_patterns[k][1];
         if(paramsParttern.test(parrtern)){
