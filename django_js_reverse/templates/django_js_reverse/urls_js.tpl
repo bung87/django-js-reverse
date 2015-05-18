@@ -1,71 +1,56 @@
-this.{{ js_var_name }} = (function () {
+{{ js_global_object_name }}.{{ js_var_name }} = (function () {
 
-    function Urls() {}
+    var Urls = { routes : {{url_routes|safe}}};
 
-    Urls._instance = {
+    var self = {
+
         url_patterns:{}
     };
 
-    Urls._get_url = function (url_pattern) {
-        var self = this._instance
+    var _get_url = function (url_pattern) {
         return function () {
-            var index, url, url_arg, url_args, _i, _len, _ref;
-            _ref = self.url_patterns[url_pattern], url = _ref[0], url_args = _ref[1];
+            var index, url, url_arg, url_args, _i, _len, _ref, _ref_list;
+            _ref_list = self.url_patterns[url_pattern];
+            for (_i = 0;
+                 _ref = _ref_list[_i], _ref[1].length != arguments.length;
+                 _i++);
+
+            url = _ref[0], url_args = _ref[1];
             for (index = _i = 0, _len = url_args.length; _i < _len; index = ++_i) {
                 url_arg = url_args[index];
-                {% if use_backbone %}
-                url = url.replace(":" + url_arg, arguments[index] || '');
-                {% else %}
                 url = url.replace("%(" + url_arg + ")s", arguments[index] || '');
-                {% endif %}
-
             }
             return '{{url_prefix|escapejs}}' + url;
         };
     };
-    Urls.routes = {{url_routes|safe}};
-    Urls.init = function () {
-        var name, pattern, self, url_patterns, _i, _len, _ref;
-        url_patterns = [
-            {% for name, pattern in urls %}
+
+    var name, pattern, self, url_patterns, _i, _len, _ref;
+    url_patterns = [
+        {% for name, patterns in urls %}
+            [
+                '{{name|escapejs}}',
                 [
-                    '{{name|escapejs}}', ['{{pattern.0|escapejs}}', [{% for arg in pattern.1 %}'{{ arg|escapejs }}'{% if not forloop.last %},{% endif %}{% endfor %}]]
+                    {% for path, args in patterns %}
+                    [
+                        '{{path|escapejs}}',
+                        [
+                            {% for arg in args %}
+                            '{{arg|escapejs}}',
+                            {% endfor %}
+                        ]{% if not forloop.last %},{% endif %}
+                    ]{% if not forloop.last %},{% endif %}
+                    {% endfor %}
                 ]{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ];
-        self = this._instance;
-        self.url_patterns = {};
-        for (_i = 0, _len = url_patterns.length; _i < _len; _i++) {
-            _ref = url_patterns[_i], name = _ref[0], pattern = _ref[1];
-            self.url_patterns[name] = pattern;
-            this[name] = this._get_url(name);
-        }
-        return self;
-    };
-    Urls.resolve=function(path){
-    var path= typeof path == 'undefined' ? document.location.pathname.slice(1):path;
-    {% if use_backbone %}
-    var paramsParttern=new RegExp(/:[a-zA-Z_-]+/g);
-    {% else %}
-    var paramsParttern=new RegExp(/%\([a-zA-Z_-]+\)[s]/g);
-    {% endif %}
-
-    for (var k in Urls._instance.url_patterns){
-       var parrtern= Urls._instance.url_patterns[k][0],args=Urls._instance.url_patterns[k][1];
-        if(paramsParttern.test(parrtern)){
-            var newPartternString=parrtern.replace(paramsParttern,'([a-zA-Z_-\\\d]+)'),
-                newParttern=new RegExp(newPartternString);
-            if(newParttern.test(path)) return k;
-        }else{
-
-            if(parrtern.indexOf(path)!==-1) {return k;}
-        }
+            ]{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    self.url_patterns = {};
+    for (_i = 0, _len = url_patterns.length; _i < _len; _i++) {
+        _ref = url_patterns[_i], name = _ref[0], pattern = _ref[1];
+        self.url_patterns[name] = pattern;
+        Urls[name] = _get_url(name);
+        Urls[name.replace(/-/g, '_')] = _get_url(name);
     }
-    };
 
     return Urls;
 })();
-
-this.{{ js_var_name }}.init();
-
-
