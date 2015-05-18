@@ -21,12 +21,10 @@ def urls_js(request):
     url_patterns = list(urlresolvers.get_resolver(None).reverse_dict.items())
     url_list = []
     url_routes={}
+    print(url_patterns)
     for url_name, url_pattern in url_patterns:
         parttern = list(url_pattern[0][0])
-
-        if isinstance(url_name, str) or isinstance(url_name, text_type):
-            pass
-        else:
+        if not isinstance(url_name, text_type):
             url_name = url_name.__name__
         matched = False
         for f in JS_REVERSE_FILTERS:
