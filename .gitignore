@@ -5,3 +5,9 @@ dist/
 build/
 django_js_reverse.egg-info/
 .tox/
+.coverage.*
+.coverage
+htmlcov/
+ghostdriver.log
+django_js_reverse/static/*
+tests/tmp/django_js_reverse/js/reverse.js

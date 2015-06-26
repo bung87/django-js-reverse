@@ -1,0 +1,8 @@
+# -*- coding: utf-8 -*-
+
+JS_VAR_NAME = 'Urls'
+JS_MINIFY = False
+JS_EXCLUDE_NAMESPACES = []
+JS_SCRIPT_PREFIX = None
+JS_GLOBAL_OBJECT_NAME = 'this'
+JS_REVERSE_USE_BACKBONE = False
